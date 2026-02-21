@@ -25,7 +25,7 @@ const useAuthData = (): AuthData => {
   useEffect(() => {
     async function fetchToken() {
       try {
-        const res = await axiosInstance.get(`/api/auth/check/${data._id}`);
+        const res = await axiosInstance.get(`/auth/check/${data._id}`);
         setData({
           ...data,
           token: res.data?.data,
