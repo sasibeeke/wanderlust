@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const useAuthData = (): AuthData => {
-  const location = useLocation;
+  const location = useLocation(); // call the hook
   const user = userState.getUser();
 
   const [data, setData] = useState<AuthData>({
@@ -15,33 +15,35 @@ const useAuthData = (): AuthData => {
     loading: true,
   });
 
+  // Reset token when user changes
   useEffect(() => {
-    setData({
-      ...data,
-      token: '',
-    });
+    setData(prev => ({ ...prev, token: '', loading: true }));
   }, [user?._id]);
 
+  // Fetch token when user._id exists or location changes
   useEffect(() => {
-    async function fetchToken() {
+    if (!data._id) return; // skip if no user id
+
+    const fetchToken = async () => {
       try {
         const res = await axiosInstance.get(`/auth/check/${data._id}`);
-        setData({
-          ...data,
-          token: res.data?.data,
+        setData(prev => ({
+          ...prev,
+          token: res.data?.data || '',
           loading: false,
-        });
+        }));
       } catch (error) {
         console.error('Error fetching token:', error);
-        setData({
-          ...data,
+        setData(prev => ({
+          ...prev,
           token: '',
           loading: false,
-        });
+        }));
       }
-    }
+    };
+
     fetchToken();
-  }, [location]);
+  }, [data._id, location]);
 
   return data;
 };
